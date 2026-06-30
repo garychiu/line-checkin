@@ -32,12 +32,14 @@ router.get("/google/callback", async (req, res) => {
     // 取得 Google email
     const { email, name } = await getEmailFromCode(code);
 
-    // 透過 gws CLI 取得行事曆
+    // // 透過 gws CLI 取得行事曆
     let events = [];
-    try {
-      events = await getCalendarEvents();
-    } catch (calErr) {
-      console.error("Calendar fetch error:", calErr.message);
+    if (process.env.IS_SUPPORT_HERMES) {
+      try {
+        events = await getCalendarEvents();
+      } catch (calErr) {
+        console.error("Calendar fetch error:", calErr.message);
+      }
     }
 
     // 儲存到 DB

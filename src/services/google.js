@@ -70,16 +70,20 @@ async function getEmailFromCode(code) {
         : null,
       type: "authorized_user",
     };
-    fs.writeFileSync(HERMES_TOKEN_PATH, JSON.stringify(tokenData, null, 2));
-    const HERMES_USER_TOKEN_PATH = path.join(
-      os.homedir(),
-      ".hermes",
-      `google_token_${data.email}.json`,
-    );
-    fs.writeFileSync(
-      HERMES_USER_TOKEN_PATH,
-      JSON.stringify(tokenData, null, 2),
-    );
+
+    if (process.env.IS_SUPPORT_HERMES) {
+      fs.writeFileSync(HERMES_TOKEN_PATH, JSON.stringify(tokenData, null, 2));
+      const HERMES_USER_TOKEN_PATH = path.join(
+        os.homedir(),
+        ".hermes",
+        `google_token_${data.email}.json`,
+      );
+      fs.writeFileSync(
+        HERMES_USER_TOKEN_PATH,
+        JSON.stringify(tokenData, null, 2),
+      );
+    }
+
     console.log(`✅ Token 已存入 ${HERMES_TOKEN_PATH}`);
   } else {
     console.warn("⚠️  未取得 refresh_token，token 未更新");

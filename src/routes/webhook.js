@@ -8,6 +8,7 @@ const UNBIND_KEYWORDS = ['解除綁定', '取消綁定', 'unbind'];
 const STATUS_KEYWORDS = ['查詢綁定', '綁定狀態', 'status'];
 
 // LINE Webhook 需要 raw body 來驗證簽名
+//!! webhook記得填寫
 router.post('/', express.raw({ type: '*/*' }), (req, res) => {
   const signature = req.headers['x-line-signature'];
 

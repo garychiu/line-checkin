@@ -73,7 +73,6 @@
 
   <script>
     const BACKEND = ''; // 與 LIFF 同源，空字串即可
-    const LiftID = '2010557278-OlBde6jn'; // !!!!  改成自己的liftId 
 
     function showBoundUI(displayName, lineId, email, sn) {
       document.getElementById('userInfo').innerHTML = `
@@ -135,10 +134,16 @@
       const sn = urlParams.get('sn') || '未知SN';
 
       document.getElementById('snBadge').textContent = `📍 ${sn}`;
+      const liftrep = await fetch(`${BACKEND}/liff/id`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+          });
+
+      const { liftId } = await liftrep.json();
 
       try {
         
-        await liff.init({ liffId: LiftID });
+        await liff.init({ liffId: liftId });
 
         if (!liff.isLoggedIn()) {
           liff.login();

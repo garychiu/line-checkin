@@ -40,4 +40,12 @@ router.get("/check", (req, res) => {
   res.json({ bound: false });
 });
 
+/**
+ * 查詢 LINE ID 的綁定狀態
+ * GET /liff/check?lineId=xxx
+ */
+router.get("/id", (req, res) => {
+  res.json({ liftId: process.env.LIFF_ID });
+});
+
 module.exports = router;

@@ -1,0 +1,19 @@
+schema: spec-driven
+
+context: |
+  Tech stack: Node.js + Express v4, SQLite (better-sqlite3, sync API), LINE Bot SDK v9 + LIFF, Google OAuth 2.0
+  Language: JavaScript (CommonJS, no TypeScript)
+  Domain: QR-code-based event/location check-in; LINE users authenticate with Google to record attendance
+  Code comments and user-facing strings are in Traditional Chinese
+  No test framework currently in use
+  Admin endpoints are unauthenticated (known gap)
+  DB schema: single `checkins` table; line_id is UNIQUE (one check-in per LINE user)
+  Dev uses ngrok; env vars loaded via dotenv
+
+rules:
+  proposal:
+    - Include a "Non-goals" section
+    - Note any impact on the checkins UNIQUE constraint
+  tasks:
+    - Keep each task independently deployable if possible
+    - Flag tasks that require ngrok/LINE/Google Console changes as "external setup required"

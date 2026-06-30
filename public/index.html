@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>地點簽到</title>
+  <!-- LIFF SDK -->
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, sans-serif;
+      background: linear-gradient(135deg, #06C755 0%, #00a040 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 40px 32px;
+      text-align: center;
+      width: 90%;
+      max-width: 360px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+    .icon { font-size: 56px; margin-bottom: 16px; }
+    h1 { font-size: 22px; color: #333; margin-bottom: 8px; }
+    .location-badge {
+      background: #f0fdf4;
+      border: 1.5px solid #06C755;
+      color: #06C755;
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 14px;
+      font-weight: bold;
+      display: inline-block;
+      margin: 12px 0 24px;
+    }
+    .btn {
+      background: #06C755;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 32px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #05b34a; }
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
+    .status { margin-top: 16px; color: #888; font-size: 13px; min-height: 20px; }
+    .error { color: #e53e3e; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">📍</div>
+    <h1>機台綁定</h1>
+    <div class="sn-badge" id="snBadge">載入中...</div>
+    <p style="color:#666; font-size:14px; margin-bottom:24px;">
+      點擊下方按鈕，以 Google 帳號完成綁定
+    </p>
+    <div id="userInfo"></div>
+    <button class="btn" id="signInBtn" disabled>
+      🔑 以 Google 帳號綁定
+    </button>
+    <p class="status" id="status">初始化中...</p>
+  </div>
+
+  <script>
+    const BACKEND = ''; // 與 LIFF 同源，空字串即可
+
+    function showBoundUI(displayName, lineId, email, sn) {
+      document.getElementById('userInfo').innerHTML = `
+        <div style="background:#f0fdf4; border:1.5px solid #06C755; border-radius:12px; padding:12px 16px; margin-bottom:16px; text-align:left; font-size:13px;">
+          <div style="margin-bottom:6px;"><span style="color:#888;">👤 名稱：</span><strong>${displayName}</strong></div>
+          <div style="word-break:break-all;"><span style="color:#888;">🆔 LINE ID：</span><code style="font-size:11px; color:#06C755;">${lineId}</code></div>
+        </div>
+        <div style="background:#fff8e1; border:1.5px solid #f6c90e; border-radius:12px; padding:14px 16px; margin-bottom:16px; text-align:left; font-size:13px;">
+          <div style="font-weight:bold; margin-bottom:8px; color:#b7860b;">✅ 此帳號已綁定</div>
+          <div style="margin-bottom:4px;"><span style="color:#888;">📧 Gmail：</span><strong>${email}</strong></div>
+          <div><span style="color:#888;">📍 機台 SN：</span><strong>${sn}</strong></div>
+        </div>
+      `;
+      document.getElementById('signInBtn').style.display = 'none';
+      document.getElementById('status').textContent = '如需重新綁定，請聯絡管理員。';
+    }
+
+    function showUnboundUI(displayName, lineId, sn) {
+      document.getElementById('userInfo').innerHTML = `
+        <div style="background:#f0fdf4; border:1.5px solid #06C755; border-radius:12px; padding:12px 16px; margin-bottom:16px; text-align:left; font-size:13px;">
+          <div style="margin-bottom:6px;"><span style="color:#888;">👤 名稱：</span><strong>${displayName}</strong></div>
+          <div style="word-break:break-all;"><span style="color:#888;">🆔 LINE ID：</span><code style="font-size:11px; color:#06C755;">${lineId}</code></div>
+        </div>
+      `;
+      document.getElementById('status').textContent = '';
+      const btn = document.getElementById('signInBtn');
+      btn.disabled = false;
+
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        document.getElementById('status').textContent = '取得 Google 登入連結中...';
+
+        try {
+          const resp = await fetch(`${BACKEND}/liff/start`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lineId, displayName, sn }),
+          });
+          const { authUrl, error } = await resp.json();
+          if (error) throw new Error(error);
+
+          liff.openWindow({ url: authUrl, external: true });
+
+          document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+              liff.closeWindow();
+            }
+          });
+        } catch (err) {
+          document.getElementById('status').textContent = '❌ 錯誤：' + err.message;
+          document.getElementById('status').classList.add('error');
+          btn.disabled = false;
+        }
+      });
+    }
+
+    async function init() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const sn = urlParams.get('sn') || '未知SN';
+
+      document.getElementById('snBadge').textContent = `📍 ${sn}`;
+
+      try {
+        await liff.init({ liffId: '2010479248-nbU9s0PP' });
+
+        if (!liff.isLoggedIn()) {
+          liff.login();
+          return;
+        }
+
+        const profile = await liff.getProfile();
+        const lineId = profile.userId;
+        const displayName = profile.displayName;
+
+        document.getElementById('status').textContent = '確認綁定狀態...';
+
+        // 查詢綁定狀態，失敗時 fallback 到未綁定流程
+        let bound = false;
+        let boundEmail = null;
+        let boundSn = null;
+        try {
+          const checkResp = await fetch(`${BACKEND}/liff/check?lineId=${encodeURIComponent(lineId)}`);
+          if (checkResp.ok) {
+            const checkData = await checkResp.json();
+            bound = checkData.bound;
+            boundEmail = checkData.email;
+            boundSn = checkData.sn;
+          }
+        } catch (_) {
+          // 網路錯誤：fallback 顯示綁定流程
+        }
+
+        if (bound) {
+          showBoundUI(displayName, lineId, boundEmail, boundSn);
+        } else {
+          showUnboundUI(displayName, lineId, sn);
+        }
+
+      } catch (err) {
+        document.getElementById('status').textContent = '❌ LIFF 初始化失敗：' + err.message;
+        document.getElementById('status').classList.add('error');
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

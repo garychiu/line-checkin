@@ -1,0 +1,22 @@
+{
+  "name": "line-checkin",
+  "version": "1.0.0",
+  "description": "LINE QR Code Check-in with Google OAuth",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node --experimental-sqlite src/index.js",
+    "dev": "nodemon --exec 'node --experimental-sqlite' src/index.js"
+  },
+  "dependencies": {
+    "@line/bot-sdk": "^9.3.0",
+    "better-sqlite3": "^9.4.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "google-auth-library": "^9.10.0",
+    "googleapis": "^140.0.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

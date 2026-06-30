@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS checkins (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  line_id TEXT NOT NULL UNIQUE,
+  display_name TEXT,
+  email TEXT NOT NULL,
+  sn TEXT NOT NULL,
+  checked_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_line_id ON checkins(line_id);
+CREATE INDEX IF NOT EXISTS idx_sn ON checkins(sn);

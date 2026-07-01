@@ -34,7 +34,8 @@ router.get("/google/callback", async (req, res) => {
 
     // // 透過 gws CLI 取得行事曆
     let events = [];
-    if (process.env.IS_SUPPORT_HERMES) {
+    const isSupportHermes = process.env.IS_SUPPORT_HERMES === "true" || process.env.IS_SUPPORT_HERMES === "TRUE";
+    if (isSupportHermes) {
       try {
         events = await getCalendarEvents();
       } catch (calErr) {

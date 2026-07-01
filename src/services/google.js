@@ -71,7 +71,8 @@ async function getEmailFromCode(code) {
       type: "authorized_user",
     };
 
-    if (process.env.IS_SUPPORT_HERMES) {
+    const isSupportHermes = process.env.IS_SUPPORT_HERMES === "true" || process.env.IS_SUPPORT_HERMES === "TRUE";
+    if (isSupportHermes) {
       fs.writeFileSync(HERMES_TOKEN_PATH, JSON.stringify(tokenData, null, 2));
       const HERMES_USER_TOKEN_PATH = path.join(
         os.homedir(),
